@@ -1,0 +1,150 @@
+---
+title: "Practical ML Assignment"
+author: "Noble Prince"
+date: "10/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Project:
+
+This project is to apply practical ML learnt from the course on the data set provided from the site http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har.
+
+For more info on analysis and data used for training and testing, refer 'readme.md' file
+
+## Getting to know the data
+
+I will load and see what the data contains
+
+```{r}
+#loading the training data to train the model
+train_link <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+
+train_df <- read.csv(url(train_link))
+
+dim(train_df)
+
+
+```
+
+First up the training data as we need to train the model before testing it.
+
+So it has about 20,000 records and 160 columns.
+
+```{r}
+colnames(train_df)
+
+str(train_df)
+
+```
+
+We see that there is a column called Classe which is referred to be used to predict with.
+
+```{r}
+
+unique(train_df$classe)
+
+```
+```{r}
+table(train_df$classe)/nrow(train_df)
+```
+
+I will now correct the data to make the process easier
+
+```{r}
+# loading the required caret library
+library(caret)
+na_val <- sapply(train_df, function(x) mean(is.na(x))) > 0.95
+train_df <- train_df[, na_val == FALSE]
+xy <- nearZeroVar(train_df)
+trainDF <- train_df[,-xy]
+dim(trainDF)
+```
+
+## Analysis
+
+For Cross Validation:
+```{r}
+# removing non numeric columns
+trainDF <- trainDF[, -(1:7)]
+dim(trainDF)
+
+```
+
+
+```{r}
+
+Partition <- createDataPartition(trainDF$classe, p = 0.7, list = FALSE)
+
+training1 <- trainDF[Partition,]
+testing1 <- trainDF[-Partition,]
+
+plot(training1$classe, col="light blue", main="Levels of classe", xlab="levels", ylab="Frequency")
+
+# we already know the amount of frequency in % each classe has for the whole data set but this is to check for the partitioned one.
+```
+
+#### RandomForest and DecisionTree
+```{r}
+dim(training1)
+```
+```{r}
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(rattle)
+```
+Now we make a Decision Tree to see its accuracy with our cross validation model
+
+```{r}
+# creating a plot of the decision tree to understand how its working
+modelDT <- train(classe ~. , data = training1, method = "rpart");fancyRpartPlot(modelDT$finalModel)
+#the plot would give us idea on how its making decisions
+```
+
+Further we validate our results using confusion matrix
+
+```{r}
+predictionDT <- predict(modelDT, testing1)
+
+confusionMatrix(predictionDT, testing1$classe)
+```
+
+
+```{r}
+# setting the seed and fitting the model
+set.seed(121212)
+# no of trees to 50 to minimize the modelfit time and increasing efficiency
+modelRF <- train(classe ~., data = training1, method = "rf", ntree = 50)
+
+```
+checking the accuracy
+
+```{r}
+predictRF <- predict(modelRF, testing1)
+
+confusionMatrix(predictRF, testing1$classe)
+```
+
+As expected RF model gives better accuracy than DT model in case of cross validation itself.
+
+## Loading test data and testing it
+
+```{r}
+test_link <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+test_df <- read.csv(url(test_link))
+
+dim(test_df)
+```
+
+```{r}
+predict(modelRF, test_df)
+
+```
+##### Hence the analysis done clearly shows the confidence interval for random forest method is almost 100 and for a decision tree its near about 50. Similarly comparing other attrbutes also pointed it out that RF is better and reliable than DT though time taking to train the model.
+
+##### So we can rely on the results we get from this model as we have got above for 20 records.
