@@ -19,6 +19,5 @@ finally tested on the test data to predict the 'classe' variable.
 
 ## Some more insights
 
-The confusion matrices show, that the Random Forest algorithm performens better than decision trees. The accuracy for the Random Forest model was 0.995 (95% CI: (0.993, 0.997)) compared to 0.47 (99% CI: (0.727, 0.752)) for Decision Tree model. The random Forest model is choosen.
-
-The expected out-of-sample error is estimated at 0.005, or 0.5%. The expected out-of-sample error is calculated as 1 - accuracy for predictions made against the cross-validation set. Our Test data set comprises 20 cases. With an accuracy above 99% on our cross-validation data, we can expect that very few, or none, of the test samples will be missclassified.
+From the confusion matrices we got, the Random Forest algorithm performes better than decision trees. The accuracy for the Random Forest model was 0.99 (95% CI: (0.993, 0.997)) compared to 0.47 (99% CI: (0.45, 0.49)) for Decision Tree model.
+The expected out-of-sample error is estimated at 0.005. The expected out-of-sample error is calculated as 1 - accuracy for predictions made against the cross-validation set. Our Test data set comprises 20 cases. With an accuracy above 99% on our cross-validation data, we can expect that very few, or none, of the test samples will be missclassified.
